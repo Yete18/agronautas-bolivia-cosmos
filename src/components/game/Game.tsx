@@ -130,39 +130,7 @@ export const Game = () => {
     }
   }, [gameState.score, gameState.unlockedPlants]);
 
-  const handleKeyPress = useCallback((e: KeyboardEvent) => {
-    setGameState((prev) => {
-      let newPos = { ...prev.playerPosition };
-
-      switch (e.key) {
-        case "ArrowUp":
-        case "w":
-          newPos.y = Math.max(0, newPos.y - 1);
-          break;
-        case "ArrowDown":
-        case "s":
-          newPos.y = Math.min(GRID_HEIGHT - 1, newPos.y + 1);
-          break;
-        case "ArrowLeft":
-        case "a":
-          newPos.x = Math.max(0, newPos.x - 1);
-          break;
-        case "ArrowRight":
-        case "d":
-          newPos.x = Math.min(GRID_WIDTH - 1, newPos.x + 1);
-          break;
-      }
-
-      return { ...prev, playerPosition: newPos };
-    });
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [handleKeyPress]);
-
-  const handleAction = () => {
+  const handleAction = useCallback(() => {
     const pos = gameState.playerPosition;
     const plantAtPos = gameState.plants.find(
       (p) => p.position.x === pos.x && p.position.y === pos.y
@@ -274,7 +242,64 @@ export const Game = () => {
         `🎉 ¡Cosechado! +${newSeeds} semillas, +${points} puntos, +${coins} monedas`
       );
     }
-  };
+  }, [gameState.playerPosition, gameState.plants, gameState.inventory, currentAction, selectedSeed]);
+
+  const handleKeyPress = useCallback((e: KeyboardEvent) => {
+    // Handle movement
+    setGameState((prev) => {
+      let newPos = { ...prev.playerPosition };
+
+      switch (e.key.toLowerCase()) {
+        case "arrowup":
+        case "w":
+          newPos.y = Math.max(0, newPos.y - 1);
+          break;
+        case "arrowdown":
+        case "s":
+          newPos.y = Math.min(GRID_HEIGHT - 1, newPos.y + 1);
+          break;
+        case "arrowleft":
+        case "a":
+          newPos.x = Math.max(0, newPos.x - 1);
+          break;
+        case "arrowright":
+        case "d":
+          newPos.x = Math.min(GRID_WIDTH - 1, newPos.x + 1);
+          break;
+      }
+
+      return { ...prev, playerPosition: newPos };
+    });
+
+    // Handle actions with keyboard shortcuts
+    switch (e.key.toLowerCase()) {
+      case " ":
+        e.preventDefault();
+        setCurrentAction("plant");
+        setTimeout(() => handleAction(), 0);
+        break;
+      case "r":
+        e.preventDefault();
+        setCurrentAction("water");
+        setTimeout(() => handleAction(), 0);
+        break;
+      case "f":
+        e.preventDefault();
+        setCurrentAction("fertilize");
+        setTimeout(() => handleAction(), 0);
+        break;
+      case "h":
+        e.preventDefault();
+        setCurrentAction("harvest");
+        setTimeout(() => handleAction(), 0);
+        break;
+    }
+  }, [handleAction]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [handleKeyPress]);
 
   const handlePurchase = (item: "water" | "fertilizer") => {
     const price = item === "water" ? 5 : 10;
@@ -321,9 +346,9 @@ export const Game = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Left Panel */}
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Left Panel - Inventory */}
+          <div className="lg:col-span-1">
             <InventoryPanel
               inventory={gameState.inventory}
               selectedSeed={selectedSeed}
@@ -332,8 +357,8 @@ export const Game = () => {
             />
           </div>
 
-          {/* Center - Game Canvas */}
-          <div className="space-y-4">
+          {/* Center - Game Canvas and Controls */}
+          <div className="lg:col-span-2 space-y-4">
             <GameCanvas
               playerPosition={gameState.playerPosition}
               plants={gameState.plants}
@@ -342,57 +367,62 @@ export const Game = () => {
 
             {/* Action Buttons */}
             <div className="neon-border rounded-lg p-4 bg-card/80 backdrop-blur-sm">
-              <h3 className="text-sm font-bold mb-3">Acciones (Espacio)</h3>
+              <h3 className="text-sm font-bold mb-3">Acciones Rápidas</h3>
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant={currentAction === "plant" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setCurrentAction("plant")}
+                  onClick={() => {
+                    setCurrentAction("plant");
+                    handleAction();
+                  }}
                   className="text-xs"
                 >
-                  🌱 Plantar
+                  🌱 Plantar (Espacio)
                 </Button>
                 <Button
                   variant={currentAction === "water" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setCurrentAction("water")}
+                  onClick={() => {
+                    setCurrentAction("water");
+                    handleAction();
+                  }}
                   className="text-xs"
                 >
-                  💧 Regar
+                  💧 Regar (R)
                 </Button>
                 <Button
                   variant={currentAction === "fertilize" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setCurrentAction("fertilize")}
+                  onClick={() => {
+                    setCurrentAction("fertilize");
+                    handleAction();
+                  }}
                   className="text-xs"
                 >
-                  ✨ Fertilizar
+                  ✨ Fertilizar (F)
                 </Button>
                 <Button
                   variant={currentAction === "harvest" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setCurrentAction("harvest")}
+                  onClick={() => {
+                    setCurrentAction("harvest");
+                    handleAction();
+                  }}
                   className="text-xs"
                 >
-                  🌾 Cosechar
+                  🌾 Cosechar (H)
                 </Button>
               </div>
-              <Button
-                onClick={handleAction}
-                className="w-full mt-3"
-                size="lg"
-              >
-                EJECUTAR (Espacio)
-              </Button>
             </div>
 
             <div className="text-xs text-center text-muted-foreground bg-muted/30 rounded p-2">
-              ⌨️ Usa WASD o Flechas para moverte
+              ⌨️ WASD/Flechas: Mover | Espacio: Plantar | R: Regar | F: Fertilizar | H: Cosechar
             </div>
           </div>
 
-          {/* Right Panel */}
-          <div>
+          {/* Right Panel - Weather */}
+          <div className="lg:col-span-1">
             <WeatherPanel
               weatherData={gameState.weatherData[gameState.currentDepartment]}
               departmentName={currentDept?.name || ""}

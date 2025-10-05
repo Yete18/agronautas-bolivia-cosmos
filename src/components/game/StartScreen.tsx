@@ -41,10 +41,22 @@ export const StartScreen = ({ onStart }: StartScreenProps) => {
           <p className="text-lg text-foreground/90">
             Astronautas especializados han llegado a Bolivia para proteger su agricultura
           </p>
-          <div className="neon-border rounded-lg p-6 bg-card/50 backdrop-blur-sm">
-            <p className="text-sm text-muted-foreground mb-4">
+          <div className="neon-border rounded-lg p-6 bg-card/50 backdrop-blur-sm space-y-4">
+            <p className="text-sm text-muted-foreground">
               Tu misión es cuidar los cultivos bolivianos usando datos satelitales en tiempo real de la NASA
             </p>
+            
+            {/* NASA APIs Badge */}
+            <div className="bg-gradient-to-r from-[hsl(var(--neon-cyan)/0.2)] to-[hsl(var(--space-purple)/0.2)] rounded-lg p-3 border border-[hsl(var(--neon-cyan)/0.3)]">
+              <div className="flex items-center justify-center gap-2 text-sm font-bold">
+                <span className="text-2xl">🛰️</span>
+                <span>5 APIs de NASA utilizadas</span>
+              </div>
+              <div className="text-xs text-muted-foreground text-center mt-1">
+                POWER • MODIS • FIRMS • GIBS • SMAP
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2">
                 <span className="text-[hsl(var(--neon-cyan))]">🌡️</span>
@@ -60,7 +72,7 @@ export const StartScreen = ({ onStart }: StartScreenProps) => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[hsl(var(--star-yellow))]">🌱</span>
-                <span>Vegetación</span>
+                <span>Vegetación (NDVI)</span>
               </div>
             </div>
           </div>
